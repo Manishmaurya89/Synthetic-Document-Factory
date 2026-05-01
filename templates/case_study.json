@@ -1,0 +1,129 @@
+{
+  "name": "Case Study",
+  "type": "case_study",
+  "description": "Business or academic case study linking issues to models and frameworks",
+  "words_per_page": 320,
+  "min_pages": 3,
+  "max_pages": 30,
+  "tone": "analytical",
+  "target_emotion": "insightful",
+  "desired_action": "apply lessons learned",
+  "technical_level": "intermediate",
+  
+  "visual_recommendations": {
+    "tables_typical_range": [1, 3],
+    "charts_typical_range": [0, 2],
+    "images_typical_range": [1, 3],
+    "primary_visual_type": "images",
+    "usage_note": "Moderate visuals; SWOT diagrams, process flowcharts, before/after comparisons"
+  },
+  
+  "sections": [
+    {
+      "title_template": "Executive Summary",
+      "required": true,
+      "min_paragraphs": 2,
+      "max_paragraphs": 2,
+      "allow_tables": false,
+      "allow_charts": false,
+      "allow_images": false,
+      "constraints": {
+        "type": "summary",
+        "max_words": 200,
+        "include": ["subject", "problem", "solution", "outcome"]
+      }
+    },
+    {
+      "title_template": "Introduction and Background",
+      "required": true,
+      "min_paragraphs": 3,
+      "max_paragraphs": 5,
+      "allow_tables": false,
+      "allow_charts": false,
+      "allow_images": false,
+      "constraints": {
+        "type": "context_setting",
+        "include": ["organization_profile", "industry_context", "situation"]
+      }
+    },
+    {
+      "title_template": "Problem Statement",
+      "required": true,
+      "min_paragraphs": 2,
+      "max_paragraphs": 4,
+      "allow_tables": false,
+      "allow_charts": false,
+      "allow_images": false,
+      "constraints": {
+        "type": "problem_definition",
+        "include": ["specific_challenges", "scope", "stakeholder_impact"]
+      }
+    },
+    {
+      "title_template": "Analysis and Framework Application",
+      "required": true,
+      "min_paragraphs": 4,
+      "max_paragraphs": 6,
+      "allow_tables": true,
+      "allow_charts": true,
+      "allow_images": true,
+      "constraints": {
+        "type": "analytical",
+        "require_framework": true,
+        "frameworks": ["SWOT", "Porter's Five Forces", "PESTLE", "Value Chain"]
+      }
+    },
+    {
+      "title_template": "Solution Evaluation",
+      "required": true,
+      "min_paragraphs": 3,
+      "max_paragraphs": 6,
+      "allow_tables": true,
+      "allow_charts": false,
+      "allow_images": false,
+      "constraints": {
+        "type": "comparison",
+        "include": ["alternatives", "pros_cons", "justification"]
+      }
+    },
+    {
+      "title_template": "Implementation",
+      "required": true,
+      "min_paragraphs": 3,
+      "max_paragraphs": 5,
+      "allow_tables": true,
+      "allow_charts": true,
+      "allow_images": false,
+      "constraints": {
+        "type": "procedural",
+        "include": ["steps_taken", "timeline", "resources"]
+      }
+    },
+    {
+      "title_template": "Results and Outcomes",
+      "required": true,
+      "min_paragraphs": 3,
+      "max_paragraphs": 5,
+      "allow_tables": true,
+      "allow_charts": true,
+      "allow_images": false,
+      "constraints": {
+        "type": "data_presentation",
+        "include": ["metrics", "impact", "lessons_learned"]
+      }
+    },
+    {
+      "title_template": "Conclusion and Recommendations",
+      "required": true,
+      "min_paragraphs": 2,
+      "max_paragraphs": 3,
+      "allow_tables": false,
+      "allow_charts": false,
+      "allow_images": false,
+      "constraints": {
+        "type": "actionable",
+        "include": ["key_insights", "recommendations", "future_applications"]
+      }
+    }
+  ]
+}

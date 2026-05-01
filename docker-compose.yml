@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  factory-app:
+    build: .
+    container_name: doc-factory
+    ports:
+      - "5001:5001"
+    env_file:
+      - .env
+    volumes:
+      - ./output:/app/output
+      - ./.cache:/app/.cache
+    restart: unless-stopped

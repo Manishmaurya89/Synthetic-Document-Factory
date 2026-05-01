@@ -1,0 +1,115 @@
+{
+  "name": "Whitepaper",
+  "type": "whitepaper",
+  "description": "Business document combining expert knowledge to argue for a specific solution",
+  "words_per_page": 300,
+  "min_pages": 4,
+  "max_pages": 30,
+  "tone": "authoritative and persuasive",
+  "target_emotion": "convinced",
+  "desired_action": "adopt solution",
+  "technical_level": "intermediate",
+  
+  "visual_recommendations": {
+    "tables_typical_range": [1, 3],
+    "charts_typical_range": [1, 4],
+    "images_typical_range": [1, 3],
+    "primary_visual_type": "charts",
+    "usage_note": "Minimal visuals; primarily data tables and comparison charts; professional diagrams"
+  },
+  
+  "sections": [
+    {
+      "title_template": "Executive Summary",
+      "required": true,
+      "min_paragraphs": 2,
+      "max_paragraphs": 3,
+      "allow_tables": false,
+      "allow_charts": false,
+      "allow_images": false,
+      "constraints": {
+        "type": "summary",
+        "max_words": 300,
+        "include": ["problem", "solution_overview", "value_proposition"]
+      }
+    },
+    {
+      "title_template": "Introduction",
+      "required": true,
+      "min_paragraphs": 2,
+      "max_paragraphs": 4,
+      "allow_tables": false,
+      "allow_charts": false,
+      "allow_images": false,
+      "constraints": {
+        "type": "hook",
+        "styles": ["statistic", "scenario", "question"]
+      }
+    },
+    {
+      "title_template": "Problem Statement",
+      "required": true,
+      "min_paragraphs": 3,
+      "max_paragraphs": 5,
+      "allow_tables": true,
+      "allow_charts": true,
+      "allow_images": false,
+      "constraints": {
+        "type": "problem_definition",
+        "include": ["pain_points", "current_limitations", "impact"]
+      }
+    },
+    {
+      "title_template": "Background and Context",
+      "required": true,
+      "min_paragraphs": 3,
+      "max_paragraphs": 6,
+      "allow_tables": true,
+      "allow_charts": false,
+      "allow_images": false,
+      "constraints": {
+        "type": "informational",
+        "include": ["market_trends", "industry_challenges", "relevant_data"]
+      }
+    },
+    {
+      "title_template": "Proposed Solution",
+      "required": true,
+      "min_paragraphs": 4,
+      "max_paragraphs": 7,
+      "allow_tables": true,
+      "allow_charts": true,
+      "allow_images": true,
+      "constraints": {
+        "type": "solution_presentation",
+        "include": ["approach", "benefits", "differentiators"]
+      }
+    },
+    {
+      "title_template": "Evidence and Case Studies",
+      "required": false,
+      "min_paragraphs": 3,
+      "max_paragraphs": 5,
+      "allow_tables": true,
+      "allow_charts": true,
+      "allow_images": false,
+      "constraints": {
+        "type": "proof",
+        "include": ["data", "testimonials", "results"]
+      }
+    },
+    {
+      "title_template": "Conclusion",
+      "required": true,
+      "min_paragraphs": 2,
+      "max_paragraphs": 3,
+      "allow_tables": false,
+      "allow_charts": false,
+      "allow_images": false,
+      "constraints": {
+        "type": "call_to_action",
+        "include": ["key_takeaways", "next_steps"]
+      }
+    }
+  ]
+}

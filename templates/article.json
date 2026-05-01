@@ -1,0 +1,128 @@
+{
+  "name": "Article",
+  "type": "article",
+  "description": "General or magazine style article with flexible structure",
+  "words_per_page": 320,
+  "min_pages": 2,
+  "max_pages": 20,
+  "tone": "Authoritative yet conversational",
+  "target_emotion": "Informed and empowered",
+  "desired_action": "Implement these strategies",
+  "technical_level": "intermediate",
+  "visual_recommendations": {
+    "tables_typical_range": [
+      0,
+      2
+    ],
+    "charts_typical_range": [
+      0,
+      2
+    ],
+    "images_typical_range": [
+      1,
+      5
+    ],
+    "primary_visual_type": "images",
+    "usage_note": "Minimal to moderate visuals; supporting images, occasional data visualization"
+  },
+  "sections": [
+    {
+      "title_template": "Introduction",
+      "required": true,
+      "min_paragraphs": 2,
+      "max_paragraphs": 3,
+      "allow_tables": false,
+      "allow_charts": false,
+      "allow_images": true,
+      "constraints": {
+        "type": "hook",
+        "styles": [
+          "anecdote",
+          "statistic",
+          "question",
+          "narrative"
+        ]
+      }
+    },
+    {
+      "title_template": "The Context of {topic}",
+      "required": true,
+      "min_paragraphs": 3,
+      "max_paragraphs": 5,
+      "allow_tables": false,
+      "allow_charts": false,
+      "allow_images": true,
+      "constraints": {
+        "type": "background",
+        "include": [
+          "current_state",
+          "significance",
+          "key_factors"
+        ]
+      }
+    },
+    {
+      "title_template": "Key Aspects and Developments",
+      "required": true,
+      "min_paragraphs": 4,
+      "max_paragraphs": 6,
+      "allow_tables": true,
+      "allow_charts": true,
+      "allow_images": true,
+      "constraints": {
+        "type": "exploration",
+        "require_bullets": false
+      }
+    },
+    {
+      "title_template": "Impact and Implications",
+      "required": true,
+      "min_paragraphs": 3,
+      "max_paragraphs": 5,
+      "allow_tables": false,
+      "allow_charts": true,
+      "allow_images": false,
+      "constraints": {
+        "type": "analysis",
+        "include": [
+          "effects",
+          "consequences",
+          "significance"
+        ]
+      }
+    },
+    {
+      "title_template": "Looking Forward",
+      "required": false,
+      "min_paragraphs": 2,
+      "max_paragraphs": 4,
+      "allow_tables": false,
+      "allow_charts": false,
+      "allow_images": false,
+      "constraints": {
+        "type": "forward_looking",
+        "include": [
+          "trends",
+          "predictions",
+          "recommendations"
+        ]
+      }
+    },
+    {
+      "title_template": "Conclusion",
+      "required": true,
+      "min_paragraphs": 2,
+      "max_paragraphs": 3,
+      "allow_tables": false,
+      "allow_charts": false,
+      "allow_images": false,
+      "constraints": {
+        "type": "synthesis",
+        "include": [
+          "key_points",
+          "broader_significance"
+        ]
+      }
+    }
+  ]
+}

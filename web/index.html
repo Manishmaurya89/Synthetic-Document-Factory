@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Synthetic Doc Factory</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="glass-container">
+        <header>
+            <h1>Synthetic Document Factory</h1>
+            <p class="subtitle">AI-Powered Production-Grade Document Generation</p>
+        </header>
+
+        <main>
+            <section class="config-panel">
+                <div class="card">
+                    <h2>Document Configuration</h2>
+                    <form id="gen-form">
+                        <div class="input-group">
+                            <label for="topic">Topic</label>
+                            <input type="text" id="topic" placeholder="e.g. Impact of Quantum Computing" required>
+                        </div>
+
+                        <div class="row">
+                            <div class="input-group">
+                                <label for="template">Template</label>
+                                <select id="template">
+                                    <option value="article">Article</option>
+                                    <option value="research_paper">Research Paper</option>
+                                    <option value="technical_report">Technical Report</option>
+                                    <option value="whitepaper">Whitepaper</option>
+                                    <option value="tutorial">Tutorial</option>
+                                    <option value="case_study">Case Study</option>
+                                </select>
+                            </div>
+                            <div class="input-group">
+                                <label for="pages">Pages</label>
+                                <input type="number" id="pages" min="1" max="50" value="1">
+                            </div>
+                        </div>
+
+                        <div class="input-group">
+                            <label>Languages</label>
+                            <div class="checkbox-group">
+                                <label><input type="checkbox" name="lang" value="eng" checked> English</label>
+                                <label><input type="checkbox" name="lang" value="hin"> Hindi</label>
+                                <label><input type="checkbox" name="lang" value="urd"> Urdu</label>
+                                <label><input type="checkbox" name="lang" value="tel"> Telugu</label>
+                                <label><input type="checkbox" name="lang" value="spa"> Spanish</label>
+                                <label><input type="checkbox" name="lang" value="fre"> French</label>
+                                <label><input type="checkbox" name="lang" value="ger"> German</label>
+                            </div>
+                        </div>
+
+                        <div id="mixing-container" class="hidden">
+                            <label>Mixing Ratio (%)</label>
+                            <div id="ratio-inputs"></div>
+                        </div>
+
+                        <div class="input-group">
+                            <label>Visual Elements</label>
+                            <div class="checkbox-group">
+                                <label><input type="checkbox" id="include-tables" checked> Tables</label>
+                                <label><input type="checkbox" id="include-images" checked> Images</label>
+                            </div>
+                        </div>
+
+                        <div class="input-group">
+                            <label for="format">Export Format</label>
+                            <select id="format">
+                                <option value="pdf">PDF Document</option>
+                                <option value="markdown">Markdown File</option>
+                                <option value="txt">Plain Text</option>
+                            </select>
+                        </div>
+
+                        <button type="submit" id="generate-btn">Generate Document</button>
+                    </form>
+                </div>
+            </section>
+
+            <section class="preview-panel">
+                <div class="card preview-card">
+                    <h2>Live Preview & Output</h2>
+                    <div id="status-container">
+                        <div class="idle-state">
+                            <p>Ready to generate. Configure your document and click generate.</p>
+                        </div>
+                    </div>
+                    
+                    <div id="preview-container" class="hidden">
+                        <div class="preview-header">
+                            <span id="file-info">document.pdf</span>
+                            <div>
+                                <button type="button" onclick="window.location.reload()" class="btn-small" style="cursor: pointer; background-color: #6c757d; border: none; margin-right: 10px;">↻ Refresh</button>
+                                <a id="download-link" href="#" class="btn-small">Download</a>
+                            </div>
+                        </div>
+                        <iframe id="pdf-frame" src="" frameborder="0"></iframe>
+                    </div>
+
+                    <div id="loader" class="hidden">
+                        <div class="spinner"></div>
+                        <p id="loading-text">Generating your masterpiece...</p>
+                        <p class="warning-text">This may take 1-3 minutes depending on page count.</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

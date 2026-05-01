@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+env/
+.env
+.cache/
+
+# Project Specific
+output/
+*.pdf
+*.md
+*.txt
+!README.md
+validation_issues.log
+
+# IDEs and OS
+.DS_Store
+.idea/
+.vscode/
+
+# Docker
+.dockerignore

@@ -1,0 +1,114 @@
+{
+  "name": "Technical Report",
+  "type": "technical_report",
+  "description": "Formal engineering or industry report with findings and recommendations",
+  "words_per_page": 320,
+  "min_pages": 4,
+  "max_pages": 60,
+  "tone": "objective",
+  "target_emotion": "confident",
+  "desired_action": "approve recommendations",
+  "technical_level": "advanced",
+  
+  "visual_recommendations": {
+    "tables_typical_range": [3, 8],
+    "charts_typical_range": [2, 5],
+    "images_typical_range": [1, 4],
+    "primary_visual_type": "tables_and_charts",
+    "usage_note": "Heavy use of diagrams, flowcharts, tables for specifications; charts for performance data"
+  },
+  
+  "sections": [
+    {
+      "title_template": "Executive Summary",
+      "required": true,
+      "min_paragraphs": 2,
+      "max_paragraphs": 3,
+      "allow_tables": false,
+      "allow_charts": false,
+      "allow_images": false,
+      "constraints": {
+        "type": "summary",
+        "max_words": 500,
+        "include": ["objectives", "key_findings", "recommendations"]
+      }
+    },
+    {
+      "title_template": "Introduction",
+      "required": true,
+      "min_paragraphs": 3,
+      "max_paragraphs": 5,
+      "allow_tables": false,
+      "allow_charts": false,
+      "allow_images": false,
+      "constraints": {
+        "type": "background",
+        "include": ["objectives", "scope", "methodology_overview"]
+      }
+    },
+    {
+      "title_template": "Background and Context",
+      "required": true,
+      "min_paragraphs": 3,
+      "max_paragraphs": 6,
+      "allow_tables": true,
+      "allow_charts": false,
+      "allow_images": true,
+      "constraints": {
+        "type": "informational"
+      }
+    },
+    {
+      "title_template": "Methodology",
+      "required": true,
+      "min_paragraphs": 3,
+      "max_paragraphs": 5,
+      "allow_tables": true,
+      "allow_charts": false,
+      "allow_images": true,
+      "constraints": {
+        "type": "procedural",
+        "include": ["approach", "tools", "procedures"]
+      }
+    },
+    {
+      "title_template": "Findings and Analysis",
+      "required": true,
+      "min_paragraphs": 4,
+      "max_paragraphs": 8,
+      "allow_tables": true,
+      "allow_charts": true,
+      "allow_images": true,
+      "constraints": {
+        "type": "data_heavy",
+        "emphasize_visuals": true
+      }
+    },
+    {
+      "title_template": "Discussion",
+      "required": true,
+      "min_paragraphs": 3,
+      "max_paragraphs": 6,
+      "allow_tables": false,
+      "allow_charts": true,
+      "allow_images": false,
+      "constraints": {
+        "type": "interpretation",
+        "include": ["significance", "comparison", "limitations"]
+      }
+    },
+    {
+      "title_template": "Conclusions and Recommendations",
+      "required": true,
+      "min_paragraphs": 3,
+      "max_paragraphs": 5,
+      "allow_tables": false,
+      "allow_charts": false,
+      "allow_images": false,
+      "constraints": {
+        "type": "actionable",
+        "include": ["conclusions", "recommendations", "next_steps"]
+      }
+    }
+  ]
+}

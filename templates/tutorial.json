@@ -1,0 +1,116 @@
+{
+  "name": "Tutorial or Guide",
+  "type": "tutorial",
+  "description": "Task-oriented technical documentation following the Diátaxis framework",
+  "words_per_page": 280,
+  "min_pages": 3,
+  "max_pages": 40,
+  "tone": "instructional",
+  "target_emotion": "capable",
+  "desired_action": "complete the task",
+  "technical_level": "intermediate",
+  
+  "visual_recommendations": {
+    "tables_typical_range": [1, 3],
+    "charts_typical_range": [0, 1],
+    "images_typical_range": [3, 10],
+    "primary_visual_type": "images",
+    "usage_note": "Heavy use of screenshots, code snippets, diagrams, flowcharts"
+  },
+  
+  "sections": [
+    {
+      "title_template": "Introduction and Overview",
+      "required": true,
+      "min_paragraphs": 2,
+      "max_paragraphs": 3,
+      "allow_tables": false,
+      "allow_charts": false,
+      "allow_images": false,
+      "constraints": {
+        "type": "overview",
+        "include": ["what_youll_learn", "why_it_matters", "time_estimate"]
+      }
+    },
+    {
+      "title_template": "Prerequisites",
+      "required": true,
+      "min_paragraphs": 1,
+      "max_paragraphs": 2,
+      "allow_tables": false,
+      "allow_charts": false,
+      "allow_images": false,
+      "constraints": {
+        "type": "requirements",
+        "require_bullets": true,
+        "include": ["required_knowledge", "required_tools", "required_setup"]
+      }
+    },
+    {
+      "title_template": "Getting Started",
+      "required": true,
+      "min_paragraphs": 2,
+      "max_paragraphs": 4,
+      "allow_tables": false,
+      "allow_charts": false,
+      "allow_images": true,
+      "constraints": {
+        "type": "setup_guide",
+        "include": ["initial_configuration", "environment_setup"]
+      }
+    },
+    {
+      "title_template": "Step-by-Step Instructions",
+      "required": true,
+      "min_paragraphs": 4,
+      "max_paragraphs": 10,
+      "allow_tables": true,
+      "allow_charts": false,
+      "allow_images": true,
+      "constraints": {
+        "type": "procedural",
+        "numbered_steps": true,
+        "include_code_blocks": true
+      }
+    },
+    {
+      "title_template": "Practical Examples",
+      "required": true,
+      "min_paragraphs": 2,
+      "max_paragraphs": 5,
+      "allow_tables": true,
+      "allow_charts": false,
+      "allow_images": true,
+      "constraints": {
+        "type": "demonstration",
+        "include": ["use_cases", "code_samples", "expected_output"]
+      }
+    },
+    {
+      "title_template": "Common Issues and Troubleshooting",
+      "required": false,
+      "min_paragraphs": 2,
+      "max_paragraphs": 4,
+      "allow_tables": true,
+      "allow_charts": false,
+      "allow_images": false,
+      "constraints": {
+        "type": "problem_solution",
+        "require_bullets": true
+      }
+    },
+    {
+      "title_template": "Summary and Next Steps",
+      "required": true,
+      "min_paragraphs": 2,
+      "max_paragraphs": 3,
+      "allow_tables": false,
+      "allow_charts": false,
+      "allow_images": false,
+      "constraints": {
+        "type": "conclusion",
+        "include": ["recap", "what_you_learned", "further_resources"]
+      }
+    }
+  ]
+}

@@ -1,0 +1,117 @@
+{
+  "name": "Academic Research Paper",
+  "type": "research_paper",
+  "description": "Formal academic research following IMRAD structure",
+  "words_per_page": 300,
+  "min_pages": 8,
+  "max_pages": 50,
+  "tone": "formal",
+  "target_emotion": "informed",
+  "desired_action": "understand research",
+  "technical_level": "advanced",
+  "citation_style": "APA",
+  
+  "visual_recommendations": {
+    "tables_typical_range": [2, 5],
+    "charts_typical_range": [1, 3],
+    "images_typical_range": [0, 2],
+    "primary_visual_type": "tables",
+    "usage_note": "Visuals concentrated in Results section"
+  },
+  
+  "sections": [
+    {
+      "title_template": "Abstract",
+      "required": true,
+      "min_paragraphs": 1,
+      "max_paragraphs": 1,
+      "allow_tables": false,
+      "allow_charts": false,
+      "allow_images": false,
+      "word_limit": 250,
+      "constraints": {
+        "type": "summary",
+        "include": ["purpose", "methods", "key_findings", "conclusions"]
+      }
+    },
+    {
+      "title_template": "Introduction",
+      "required": true,
+      "min_paragraphs": 3,
+      "max_paragraphs": 5,
+      "allow_tables": false,
+      "allow_charts": false,
+      "allow_images": false,
+      "constraints": {
+        "type": "background",
+        "include": ["context", "research_gap", "objectives"]
+      }
+    },
+    {
+      "title_template": "Literature Review",
+      "required": true,
+      "min_paragraphs": 4,
+      "max_paragraphs": 8,
+      "allow_tables": true,
+      "allow_charts": false,
+      "allow_images": false,
+      "constraints": {
+        "type": "analysis",
+        "require_citations": true
+      }
+    },
+    {
+      "title_template": "Methodology",
+      "required": true,
+      "min_paragraphs": 3,
+      "max_paragraphs": 6,
+      "allow_tables": true,
+      "allow_charts": false,
+      "allow_images": false,
+      "constraints": {
+        "type": "procedural",
+        "include": ["research_design", "data_collection", "analysis_methods"]
+      }
+    },
+    {
+      "title_template": "Results",
+      "required": true,
+      "min_paragraphs": 3,
+      "max_paragraphs": 6,
+      "allow_tables": true,
+      "allow_charts": true,
+      "allow_images": false,
+      "constraints": {
+        "type": "data_presentation",
+        "objective_only": true,
+        "no_interpretation": true
+      }
+    },
+    {
+      "title_template": "Discussion",
+      "required": true,
+      "min_paragraphs": 4,
+      "max_paragraphs": 7,
+      "allow_tables": false,
+      "allow_charts": false,
+      "allow_images": false,
+      "constraints": {
+        "type": "interpretation",
+        "include": ["findings_meaning", "comparison_to_literature", "limitations"]
+      }
+    },
+    {
+      "title_template": "Conclusion",
+      "required": true,
+      "min_paragraphs": 2,
+      "max_paragraphs": 3,
+      "allow_tables": false,
+      "allow_charts": false,
+      "allow_images": false,
+      "constraints": {
+        "type": "summary",
+        "include": ["key_findings", "implications", "future_research"]
+      }
+    }
+  ]
+}
