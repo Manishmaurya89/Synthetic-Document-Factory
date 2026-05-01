@@ -2,7 +2,7 @@
 
 An AI-powered pipeline to generate professional-grade, multi-page synthetic documents in multiple languages (English, Hindi, Urdu, Telugu, Spanish, French, German).
 
-## 🚀 Quick Start (Docker)
+##  Quick Start (Docker)
 
 The easiest way to run the factory is using Docker.
 
@@ -29,13 +29,13 @@ The easiest way to run the factory is using Docker.
 4. **Access the UI:**
    Open [http://localhost:5001](http://localhost:5001) in your browser.
 
-## 🛠 Features
+## Features
 - **Multilingual Support:** Strict language ratio enforcement for 7 languages.
 - **Visuals:** Auto-generated tables and high-fidelity image fetching.
 - **Smart Script Detection:** Renders Devanagari, Arabic, and Telugu scripts correctly in PDFs.
 - **Web Dashboard:** Interactive UI to configure and generate documents.
 
-## 🔒 Security & API Keys
+## Security & API Keys
 This project uses a `.env` file for sensitive keys. 
 - The `.gitignore` file is configured to **automatically ignore** `.env`.
 - Always use `.env.example` to share the structure without the actual data.
