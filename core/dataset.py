@@ -71,7 +71,7 @@ def export_dataset(out_dir: str, renders: list, dpi: int = 150, preview: bool = 
                     "doc_name": render["name"], "page_no": page_no,
                 })
 
-                # PDF points (origin bottom-left) → image pixels (origin top-left)
+                # PDF points (origin bottom-left) to image pixels (origin top-left)
                 sx, sy = image.width / page_w, image.height / page_h
                 pixel_boxes = []
                 for b in render["boxes"]:

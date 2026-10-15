@@ -27,7 +27,7 @@ except ImportError:  # charts fall back to a data table
 
 
 FONTS = {
-    # family: (regular, bold, italic) — PDF built-in fonts, no files needed
+    # family: (regular, bold, italic). Built into every PDF reader, so no font files needed
     "Times": ("Times-Roman", "Times-Bold", "Times-Italic"),
     "Helvetica": ("Helvetica", "Helvetica-Bold", "Helvetica-Oblique"),
 }
@@ -67,7 +67,7 @@ class LayoutStyle:
         )
 
 
-# ── Text helpers ─────────────────────────────────────────────────
+# Text helpers
 
 # The built-in PDF fonts only cover Latin-1 (cp1252) characters
 _ASCII_MAP = str.maketrans({
@@ -100,7 +100,7 @@ _LIST_RE = re.compile(r"^\s*([-*•]|\d+[.)])\s+(.+)$")
 _HEADING_RE = re.compile(r"^\s*#{1,6}\s+(.+)$")
 
 
-# ── Layout tracking ──────────────────────────────────────────────
+# Layout tracking
 
 def _flowable_size(f):
     if isinstance(f, Table):
@@ -226,7 +226,7 @@ class DocumentAssembler:
         self.document_title = title
         self.sections_data = sections_data
 
-    # ── Styles ───────────────────────────────────────────────────
+    # Styles
     def _make_styles(self) -> dict:
         s = self.style
         regular, bold, italic = FONTS[s.font]
@@ -266,9 +266,9 @@ class DocumentAssembler:
         p._layout_label = label
         return p
 
-    # ── Content → flowables ──────────────────────────────────────
+    # Content to flowables
     def _block_flowables(self, block: str) -> list:
-        """One '\\n\\n' block → paragraphs, list items and sub-headings."""
+        """Split one '\\n\\n' block into paragraphs, list items and sub-headings."""
         out, lines = [], []
 
         def flush():
@@ -327,7 +327,7 @@ class DocumentAssembler:
 
     def _chart_flowables(self, visual: dict, number: int, width: float) -> list:
         png = self._draw_chart_png(visual)
-        if png is None:  # can't plot → show the numbers as a table
+        if png is None:  # can't plot it, so show the numbers as a table
             data = visual.get("data", {})
             labels = data.get("labels", [])
             datasets = data.get("datasets", [])
@@ -383,7 +383,7 @@ class DocumentAssembler:
             add_visuals(i)
         return out
 
-    # ── Charts ───────────────────────────────────────────────────
+    # Charts
     @staticmethod
     def _to_number(value) -> float:
         return float(str(value).replace(",", "").replace("%", "").strip())
@@ -450,7 +450,7 @@ class DocumentAssembler:
             plt.close(fig)
         return path
 
-    # ── Page decoration (running header + page number) ───────────
+    # Page decoration (running header + page number)
     def _decorate_page(self, canv, doc):
         s = self.style
         regular = FONTS[s.font][0]
@@ -483,7 +483,7 @@ class DocumentAssembler:
                                "x1": s.margin + hw, "y1": hy + ascent, "text": text})
         canv.restoreState()
 
-    # ── Render ───────────────────────────────────────────────────
+    # Render
     def export_pdf(self, output_path: str):
         """Render the document to PDF and record every element's box in
         self.boxes. Raises RuntimeError if rendering fails, so the page-control

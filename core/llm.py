@@ -1,12 +1,11 @@
-import time
-import requests
+import json
 import os
 import re
-import json
-from typing import List
+import time
+
+import requests
 from dotenv import load_dotenv
 
-# Load environment variables
 load_dotenv(override=True)
 
 # "Paragraph 1:", "**Section 2.**", "P3)" etc. A number AND a separator are
@@ -40,7 +39,7 @@ class ContentGenerator:
                 f"Model '{self.ollama_model}' is not installed in Ollama. "
                 f"Run: ollama pull {self.ollama_model}"
             )
-        print(f"[LLM] Ollama ready — model: {self.ollama_model}")
+        print(f"Using Ollama model {self.ollama_model}")
 
     @staticmethod
     def strip_labels(text: str) -> str:
@@ -66,14 +65,9 @@ class ContentGenerator:
                             "top_p": 0.9,
                             "top_k": 40,
                             "repeat_penalty": 1.1,
-                            # FIX 5 — Original num_ctx=4096 caused token starvation.
-                            # The section generation prompt alone consumes ~600–800 tokens
-                            # (prompt text + context block), leaving only ~3200 tokens for
-                            # the response inside a 4096 window. mistral stops generating
-                            # before reaching the word target. 8192 gives the model a full
-                            # 3500-token response budget even with a large context block.
-                            # If your hardware cannot run 8192, set OLLAMA_NUM_CTX=4096
-                            # in your environment — the code will use that value instead.
+                            # With 4096 the section prompt and context leave too little
+                            # room, and mistral stops before the word target. Set
+                            # OLLAMA_NUM_CTX=4096 if 8192 doesn't fit in memory.
                             "num_ctx": int(os.getenv("OLLAMA_NUM_CTX", "8192")),
                         },
                     },
@@ -109,8 +103,6 @@ class ContentGenerator:
 
     @staticmethod
     def plan_sections(target_pages: int) -> int:
-        if not isinstance(target_pages, int):
-            target_pages = 2
         if target_pages <= 3:
             return 2
         elif target_pages <= 6:
@@ -128,8 +120,7 @@ class ContentGenerator:
     def calculate_targets(target_pages: int, num_sections: int, words_per_page: int = 320):
         total_words = target_pages * words_per_page
         words_per_section = total_words // num_sections
-        # paragraphs_per_section is returned for logging only —
-        # generation no longer uses it as a hard ceiling
+        # paragraphs_per_section is only printed, generation doesn't use it
         paragraphs_per_section = max(2, words_per_section // 150)
         return paragraphs_per_section, words_per_section
 
@@ -182,26 +173,15 @@ OUTPUT (start with SECTION_1):"""
         target_words: int = 800,
         context: str = "",
     ) -> str:
-        """
-        TWO-CALL SPLIT GENERATION — solving mistral's 4096 context ceiling.
+        """Write a section in two calls of about half the words each.
 
-        Root cause of 5-page initial renders on a 10-page target:
-        mistral 7B on Ollama (Mac) loads with num_ctx=4096 by default.
-        The per-request num_ctx override is silently ignored if the model
-        was loaded with a smaller window. With ~700 prompt tokens consumed
-        by instructions + cross-section context, only ~1400-1600 response
-        tokens remain — enough for ~350-400 words, not 800.
-
-        Fix: split each section into TWO calls of ~half the target each.
-        Each call has a short, focused prompt (~300 tokens) leaving ~1700
-        tokens for the response (~425 words). Two calls = ~850 words total,
-        reliably hitting the 800-word target regardless of num_ctx setting.
-        The second call receives the first half as its context so ideas flow
-        naturally without repetition.
+        mistral on Ollama often runs with a 4096-token window, so a single call
+        stops at around 400 words. Two shorter calls reach the target, and the
+        second one sees the end of the first so it doesn't repeat it.
         """
         half_target = max(200, target_words // 2)
 
-        # Cross-section context block (kept short to preserve response budget)
+        # Kept short so it doesn't eat into the answer's token budget
         prior_block = ""
         if context and len(context) > 50:
             prior_block = (
@@ -209,7 +189,6 @@ OUTPUT (start with SECTION_1):"""
                 f"{context[-400:]}\n\n"
             )
 
-        # ── CALL 1: First half of the section ─────────────────────────
         prompt_1 = f"""Write the first part of a section for a professional document.
 
 TOPIC: {topic}
@@ -221,10 +200,9 @@ Do NOT open with generic phrases. Do NOT summarize or conclude — this is the F
 Write only paragraphs, no labels or headers:"""
 
         part1 = self._generate(prompt_1, max_tokens=1800, temperature=0.72)
-        part1 = self.strip_labels(self._strip_fences(part1))
+        part1 = self.strip_labels(part1)
 
-        # ── CALL 2: Second half, continuing from part1 ─────────────────
-        # We pass the tail of part1 as context so the model continues naturally
+        # Second half, given the end of the first half so it carries on from there
         part1_tail = ' '.join(part1.split()[-300:]) if len(part1.split()) > 300 else part1
 
         prompt_2 = f"""Continue writing the same document section. This is the SECOND HALF.
@@ -242,9 +220,9 @@ Each paragraph covers ONE new idea with a concrete example.
 Write only paragraphs, no labels or headers:"""
 
         part2 = self._generate(prompt_2, max_tokens=1800, temperature=0.72)
-        part2 = self.strip_labels(self._strip_fences(part2))
+        part2 = self.strip_labels(part2)
 
-        # Remove any conclusion-language that leaked into part2's end
+        # Small models like to end with "In conclusion, ..." - drop that sentence
         bad_closers = ["in conclusion,", "to summarize,", "in summary,", "to conclude,",
                        "as we have seen,", "overall,"]
         if any(p in part2.lower()[-120:] for p in bad_closers):
@@ -260,19 +238,11 @@ Write only paragraphs, no labels or headers:"""
         return combined
 
     def evaluate_paragraph(self, paragraph: str, context: str = "") -> tuple[bool, str]:
-        """
-        ANTIGRAVITY PROMPT — QUALITY EVALUATION
-        ----------------------------------------
-        Original was a trivial word-count gate that marked almost everything
-        as passing (rewrite_weak_paragraph was also a no-op). This version
-        actually evaluates content quality using three fast heuristics that
-        a small LLM can reliably answer.
-        """
+        """Quick checks without an LLM call. Returns (ok, reason)."""
         word_count = len(paragraph.split())
         if word_count < 60:
-            return False, "too short — under 60 words"
+            return False, "too short, under 60 words"
 
-        # Fast structural smell-tests that don't need an LLM call
         bad_openers = [
             "in today's world", "it is important to note", "it is widely known",
             "needless to say", "as previously mentioned", "as we have seen",
@@ -289,7 +259,7 @@ Write only paragraphs, no labels or headers:"""
             if lower.endswith(phrase) or phrase in lower[-80:]:
                 return False, f"conclusion filler detected: '{phrase}'"
 
-        # Repetition check against recent context
+        # Mostly the same words as the paragraphs just before it
         if context and len(context) > 100:
             para_words = set(paragraph.lower().split())
             ctx_words  = set(context.lower().split())
@@ -300,14 +270,8 @@ Write only paragraphs, no labels or headers:"""
         return True, ""
 
     def rewrite_weak_paragraph(self, paragraph: str, context: str, reason: str) -> str:
-        """
-        ANTIGRAVITY PROMPT — REWRITE WEAK PARAGRAPH
-        ---------------------------------------------
-        Original returned the paragraph unchanged. This version actually
-        rewrites — but only on targeted grounds matching the failure reason,
-        so the LLM has a clear, narrow instruction rather than a vague
-        'improve this' prompt.
-        """
+        # A narrow instruction for the actual problem works much better with
+        # small models than a vague "improve this paragraph".
         if "generic opener" in reason:
             instruction = (
                 "The paragraph starts with a weak, generic phrase. "
@@ -359,23 +323,18 @@ RECENT CONTEXT (for reference — do not repeat these ideas):
 Write ONLY the rewritten paragraph. No labels, no preamble, no explanation:"""
 
         result = self._generate(prompt, max_tokens=600, temperature=0.65).strip()
-        result = self.strip_labels(self._strip_fences(result))
+        result = self.strip_labels(result)
 
-        # Safety: only accept rewrite if it's not shorter than original by >30%
+        # Keep the original if the rewrite lost more than 30% of it
         if len(result.split()) > len(paragraph.split()) * 0.7 and len(result) > 60:
             return result
         return paragraph
 
     def expand_paragraph(self, paragraph: str) -> str:
-        """
-        ANTIGRAVITY PROMPT — PARAGRAPH EXPANSION
-        -----------------------------------------
-        Original: asked for 50-100 more words, accepted any growth >30 words.
-        Problem: small models would pad with filler or just repeat.
+        """Lengthen a paragraph by working in one concrete example.
 
-        New approach: ask specifically for a new EXAMPLE or EVIDENCE sentence
-        to be woven in. This gives the model a concrete task (find an example)
-        rather than an abstract task (be longer), which small models handle far better.
+        Asking a small model to just "make it longer" gets filler, so ask for an
+        example instead.
         """
         prompt = f"""You are deepening a paragraph in a professional document.
 
@@ -397,7 +356,7 @@ RULES:
 - Write ONLY the expanded paragraph (no labels, no explanation):"""
 
         result = self._generate(prompt, max_tokens=900, temperature=0.68).strip()
-        result = self.strip_labels(self._strip_fences(result))
+        result = self.strip_labels(result)
 
         growth = len(result.split()) - len(paragraph.split())
         if growth > 25 and len(result.split()) > 90:
@@ -405,18 +364,10 @@ RULES:
         return paragraph
 
     def generate_new_content_block(self, topic: str, section_title: str, context: str) -> str:
-        """
-        ANTIGRAVITY PROMPT — LARGE EXPANSION BLOCK
-        -------------------------------------------
-        Original: asked for 2-3 paragraphs but then rejected the output if it
-        contained ANY conclusion language — which small models default to when
-        they sense they're near the end of a response. The result was constant
-        rejection loops.
+        """Two new paragraphs for the middle of a section.
 
-        New approach: we ask for exactly 2 paragraphs and frame them as a
-        "mid-section continuation", not an ending. We explicitly tell the model
-        it is writing the MIDDLE of a section that continues after this block.
-        This suppresses closing-language instincts.
+        Telling the model the section carries on after its paragraphs stops it
+        from wrapping up with "In conclusion".
         """
         prompt = f"""You are writing two paragraphs that appear in the MIDDLE of a longer section. The section continues after your contribution — you are not concluding anything.
 
@@ -448,36 +399,22 @@ ABSOLUTE PROHIBITIONS:
 Write the 2 paragraphs now (no labels, no headers):"""
 
         result = self._generate(prompt, max_tokens=1800, temperature=0.73).strip()
-        # Strip any "Paragraph N:" labels the model may have emitted
-        result = self.strip_labels(self._strip_fences(result))
+        result = self.strip_labels(result)
 
-        # Reject hard-conclusion signals but allow softer forward-looking language
         hard_closers = ["in conclusion,", "to summarize,", "to conclude,", "in summary,"]
         if any(phrase in result.lower() for phrase in hard_closers):
-            # Try to recover by stripping the offending sentence
             sentences = result.split('. ')
             sentences = [s for s in sentences if not any(p in s.lower() for p in hard_closers)]
             result = '. '.join(sentences).strip()
 
-        # FIX 6: threshold lowered 200 → 120. mistral returns 170-240 words
-        # for 2-paragraph requests; the 200 floor was rejecting valid blocks.
+        # mistral usually gives 170-240 words for this
         if len(result.split()) < 120:
             return ""
 
         return result
 
     def generate_new_idea_paragraph(self, topic: str, section_title: str, context: str) -> str:
-        """
-        ANTIGRAVITY PROMPT — SINGLE IDEA PARAGRAPH INJECTION
-        ------------------------------------------------------
-        Original: asked for 150-200 words then rejected if conclusion language
-        appeared anywhere. High rejection rate made the expansion loop stall.
-
-        New approach: frame the paragraph explicitly as an interior paragraph
-        (not the last one), and ask for a specific TYPE of content — a case
-        study — which gives the model a concrete task and naturally avoids
-        summary language.
-        """
+        """One new paragraph built around an example the section hasn't used yet."""
         prompt = f"""Write one interior paragraph for an ongoing section of a professional document. This paragraph is NOT the last one in the section.
 
 DOCUMENT TOPIC: {topic}
@@ -500,8 +437,7 @@ RULES:
 - 130–190 words. No labels. No preamble. Just the paragraph:"""
 
         result = self._generate(prompt, max_tokens=900, temperature=0.74).strip()
-        # Strip any "Paragraph N:" labels
-        result = self.strip_labels(self._strip_fences(result))
+        result = self.strip_labels(result)
 
         word_count = len(result.split())
         if word_count < 80:
@@ -509,7 +445,7 @@ RULES:
 
         hard_closers = ["in conclusion,", "to summarize,", "in summary,", "to conclude,"]
         if any(phrase in result.lower() for phrase in hard_closers):
-            # Strip the closing sentence rather than discarding the whole paragraph
+            # Drop just the closing sentence, the rest is usually fine
             sentences = result.rstrip('.').split('. ')
             if len(sentences) > 1:
                 last = sentences[-1].lower()
@@ -525,13 +461,7 @@ RULES:
         return result
 
     def compress_paragraph(self, paragraph: str) -> str:
-        """
-        ANTIGRAVITY PROMPT — PARAGRAPH COMPRESSION
-        -------------------------------------------
-        Unchanged in structure but tightened: we now ask for SPECIFIC cuts
-        (filler adverbs, throat-clearing, redundant examples) rather than
-        a vague percentage reduction, which gives small models clearer targets.
-        """
+        """Make a paragraph 25-40% shorter without losing facts."""
         prompt = f"""Tighten this paragraph without losing any of its meaning or specific details.
 
 ORIGINAL:
@@ -548,7 +478,7 @@ EDITING INSTRUCTIONS:
 Write ONLY the tightened paragraph (no labels):"""
 
         result = self._generate(prompt, max_tokens=700, temperature=0.5).strip()
-        result = self.strip_labels(self._strip_fences(result))
+        result = self.strip_labels(result)
 
         original_words = len(paragraph.split())
         new_words = len(result.split())
@@ -575,32 +505,13 @@ Write ONLY the tightened paragraph (no labels):"""
                 return num_paragraphs - 2
         return num_paragraphs - 1
 
-    def generate_table_for_section(self, topic: str, section_title: str, section_content: str, table_count: int = 1) -> List[dict]:
+    def generate_table_for_section(self, topic: str, section_title: str, section_content: str) -> list[dict]:
+        """Comparison table of the things the section talks about.
+
+        Asking "does this section need a table?" gets a "no" for most prose, so
+        tell the model exactly what to build. If that fails, fall back to a
+        simple 3x3 table based on the section title only.
         """
-        TABLE GENERATION — TWO-STAGE APPROACH
-        ──────────────────────────────────────
-        Root cause of consistent empty returns:
-        The old prompt asked "does this section deserve a table?" — a binary
-        gating question that mistral answers "no" for all narrative/prose
-        content (animals, history, social science) because there is no
-        pre-existing numerical data to tabulate.
-
-        Fix — Stage 1: Directed extraction prompt.
-        Instead of asking "should there be a table?", we tell the model
-        EXACTLY what type of table to build and from what material:
-        a comparison table of the key named entities (species, events,
-        places, strategies) mentioned in the section, with columns that
-        are meaningful for that content type. Every section has at least
-        3-4 nameable subjects — this prompt surfaces them.
-
-        Fix — Stage 2: Entity-synthesis fallback.
-        If Stage 1 still returns empty (mistral truncated, malformed JSON,
-        or genuinely no entities found), Stage 2 sends a simpler, shorter
-        prompt asking only for a 3-row × 3-column summary table about the
-        section's topic directly — bypassing content analysis entirely.
-        """
-
-        # ── Stage 1: Directed extraction ──────────────────────────────
         prompt_1 = f"""You are building a comparison table for a professional document section.
 
 DOCUMENT TOPIC: {topic}
@@ -653,8 +564,7 @@ Respond with ONLY this JSON, no preamble, no explanation:
                 t["type"] = "table"
             return tables
 
-        # ── Stage 2: Entity-synthesis fallback ────────────────────────
-        # Simpler prompt, no content analysis — just build from topic+section name
+        # Fallback: shorter prompt that doesn't need the section text
         prompt_2 = f"""Create a concise comparison table for a document section about "{section_title}" in a document about "{topic}".
 
 Build a table with 3 rows and 3 columns comparing the 3 most relevant aspects,
@@ -691,11 +601,7 @@ Respond with ONLY this JSON:
         return []
 
     def _parse_tables_json(self, response: str) -> list:
-        """
-        Robust JSON extractor for table responses.
-        Handles: preamble text, trailing commentary, partial fences,
-        and mistral's habit of adding explanation after the closing brace.
-        """
+        """Keep the tables that have at least 2 columns and 2 rows."""
         valid = []
         for t in self._load_json_list(response, "tables"):
             d = t.get("data")
@@ -712,9 +618,11 @@ Respond with ONLY this JSON:
         return valid
 
     def _load_json_list(self, response: str, key: str) -> list:
-        """Parse the model's JSON and return data[key] as a list of dicts.
-        Models sometimes return a bare object or a dict instead of a list —
-        treat anything unexpected as 'no result' instead of crashing."""
+        """Return data[key] from the model's JSON as a list of dicts.
+
+        Models sometimes send one object instead of a list, or something else
+        entirely; anything unexpected counts as no result.
+        """
         if not response:
             return []
         try:
@@ -730,20 +638,11 @@ Respond with ONLY this JSON:
             return []
         return [i for i in items if isinstance(i, dict)]
 
-    def generate_chart_for_section(self, topic: str, section_title: str, section_content: str, chart_count: int = 1) -> List[dict]:
-        """
-        CHART GENERATION — DIRECTED SYNTHESIS
-        ──────────────────────────────────────
-        Same root problem as generate_table_for_section: the old prompt
-        asked "does this section have chart-worthy data?" — mistral answers
-        "no" for all narrative content because there is no pre-existing
-        quantitative dataset in the prose.
+    def generate_chart_for_section(self, topic: str, section_title: str, section_content: str) -> list[dict]:
+        """Bar chart comparing 3-5 things from the section.
 
-        Fix: instruct the model to SYNTHESISE plausible comparative data
-        for the 3–4 key entities/concepts in the section, creating a bar
-        chart that illustrates relative differences. For narrative content
-        (animal populations, battle casualties, conservation impact), this
-        produces meaningful charts that genuinely illustrate the section.
+        Prose rarely has real numbers to plot, so the model is allowed to use
+        rough estimates.
         """
         prompt = f"""Create a bar chart for a professional document section.
 
@@ -790,7 +689,6 @@ Respond with ONLY this JSON, no preamble:
 }}"""
 
         response = self._generate(prompt, max_tokens=900, temperature=0.5)
-        # Validate minimum chart structure
         valid = []
         for c in self._load_json_list(response, "charts"):
             d = c.get("data")
