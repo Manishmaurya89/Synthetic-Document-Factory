@@ -1,0 +1,7 @@
+requests
+reportlab
+pypdf
+pypdfium2
+pillow
+matplotlib
+python-dotenv
