@@ -28,7 +28,7 @@ any [Ollama](https://ollama.com) model, lays them out in different styles, and r
 **1. Install Ollama** from [ollama.com/download](https://ollama.com/download) and pull a model:
 
 ```bash
-ollama pull llama3
+ollama pull mistral
 ```
 
 **2. Set up the project:**
@@ -146,3 +146,7 @@ Topic + page count
 - English (Latin-alphabet) text only, because the PDFs use the built-in PDF fonts.
 - Each document takes several minutes on a laptop, since a local LLM writes every section. Use `--variants` to get
   more labelled pages from the same text.
+
+## License
+
+Released under the MIT License (see `LICENSE`).
